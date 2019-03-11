@@ -24,19 +24,3 @@ class TransactionData(object):
             self.content[key] = value
         else:
             raise TypeError("key must be an string parameter")
-
-
-class PaymentData(object):
-    amount = None
-    transaction_id = None
-    ready = False
-
-    def __init__(self, transaction_id, amount):
-        self.amount = amount
-        self.transaction_id = transaction_id
-
-    def is_ready(self):
-        return self.ready
-
-    def set_ready(self):
-        self.ready = True

@@ -2,7 +2,6 @@ from Queue import Queue
 from threading import Thread
 
 from flask import Flask, request, abort
-from transaction import PaymentData
 from tbkpos import TbkPos
 
 app = Flask(__name__)
