@@ -1,6 +1,6 @@
 from Queue import Queue
 from json import dumps
-from threading import Thread
+from threading import Thread, RLock
 
 from flask import Flask, request, abort
 from tbkpos import TbkPos
@@ -15,14 +15,17 @@ payment_queue = Queue()
 check_queue = Queue()
 
 transactions_in_progress = {}
+safe_pos = RLock()
 
 
 def worker_sale(amount, transaction_id):
+    safe_pos.acquire()
     print("Worker started")
     transactions_in_progress[transaction_id] = None
     pos_status = pos.sale_init(amount, transaction_id)
     transactions_in_progress[transaction_id] = pos_status
     print("Worker ended")
+    safe_pos.release()
 
 
 def pos_on_thread(amount, transaction_id):
