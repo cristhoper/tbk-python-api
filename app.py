@@ -5,14 +5,16 @@ from threading import Thread, RLock
 from flask import Flask, request, abort
 from tbkpos import TbkPos
 
-app = Flask(__name__)
-pos = TbkPos('/dev/ttyUSB0', 9600)
-
 GET = ['GET']
 POST = ['POST']
 
-payment_queue = Queue()
-check_queue = Queue()
+DEVICE = "/dev/ttyUSB0"
+IP = "0.0.0.0"
+PORT = 4001
+
+app = Flask(__name__)
+pos = TbkPos(DEVICE, 9600)
+
 
 transactions_in_progress = {}
 safe_pos = RLock()
@@ -58,9 +60,9 @@ def payment():
     if request.method in POST:
         if t_id not in transactions_in_progress.keys():
             pos_on_thread(amount, t_id)
+            return "ACK"
         else:
             return "BUSY"
-        return "ACK"
     return "NAK"
 
 
@@ -93,6 +95,5 @@ def check(transaction_id):
 if __name__ == "__main__":
     pos.initialization()
     pos.polling()
-    print("Turn on socket")
-    app.run(debug=True, host='0.0.0.0', port=4001, use_reloader=False)
+    app.run(debug=True, host=IP, port=PORT, use_reloader=False)
 
