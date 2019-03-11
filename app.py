@@ -1,0 +1,65 @@
+from Queue import Queue
+from flask import Flask, request, abort
+from transaction import PaymentData
+from tbkpos import TbkPos
+
+
+app = Flask(__name__)
+pos = TbkPos('/dev/ttyUSB0', 9600)
+
+GET = ['GET']
+POST = ['POST']
+
+payment_queue = Queue()
+check_queue = Queue()
+
+
+if __name__ == "__main__":
+    pos.initialization()
+    transaction = pos.polling()
+    app.run(debug=True, host='0.0.0.0', port=4001, use_reloader=False)
+
+
+def worker_sale(amount, transaction_id):
+    pos.sale_init(amount, transaction_id)
+
+@app.route("/payment", methods=POST)
+def payment():
+    """
+    POST /payment:
+    {
+    "transaction_id": integer
+    "amount": integer
+    }
+
+    :returns
+    """
+    data = request.get_json() if request.method in POST else None
+
+    if data is None:
+        return abort(405)
+
+    if request.method in POST:
+        payment_data = PaymentData(data['transaction_id'], data['amount'])
+        payment_queue.put(payment_data)
+        return "ACK"
+    return "NAK"
+
+
+@app.route("/check/<transaction_id>", methods=GET)
+def check(transaction_id):
+    """
+    GET /check/<transaction_id>:
+
+    :returns 404 if transaction_id doesn't exists, json POST otherwise.
+    {
+    "transaction_id": string,
+    "approval_code": string,
+    "print_data": string,
+    }
+    """
+    if transaction_id is None:
+        return abort(404)
+    status = check_queue.get()
+
+    return "OK" if status else abort(405)

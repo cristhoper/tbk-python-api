@@ -1,0 +1,5 @@
+setuptools
+json_rpc==1.10.3
+requests==2.2.1
+flask==0.12.2
+pyserial==3.3
