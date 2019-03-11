@@ -1,4 +1,5 @@
 from Queue import Queue
+from json import dumps
 from threading import Thread
 
 from flask import Flask, request, abort
@@ -15,16 +16,13 @@ check_queue = Queue()
 
 transactions_in_progress = {}
 
-if __name__ == "__main__":
-    pos.initialization()
-    pos.polling()
-    app.run(debug=True, host='0.0.0.0', port=4001, use_reloader=False)
-
 
 def worker_sale(amount, transaction_id):
-    transactions_in_progress[transaction_id] = False
+    print("Worker started")
+    transactions_in_progress[transaction_id] = None
     pos_status = pos.sale_init(amount, transaction_id)
-    transactions_in_progress[transaction_id] = pos_status.result
+    transactions_in_progress[transaction_id] = pos_status
+    print("Worker ended")
 
 
 def pos_on_thread(amount, transaction_id):
@@ -52,8 +50,13 @@ def payment():
     if data is None:
         return abort(405)
 
+    t_id = int(data['transaction_id'])
+    amount = data['amount']
     if request.method in POST:
-        pos_on_thread(data['amount'], data['transaction_id'])
+        if t_id not in transactions_in_progress.keys():
+            pos_on_thread(amount, t_id)
+        else:
+            return "BUSY"
         return "ACK"
     return "NAK"
 
@@ -73,8 +76,20 @@ def check(transaction_id):
     if transaction_id is None:
         return abort(404)
 
-    status = False
+    status = None
+    transaction_id = int(transaction_id)
     if transaction_id in transactions_in_progress.keys():
         status = transactions_in_progress[transaction_id]
+        if status is not None:
+            content = status.get_content()
+            return dumps(content, ensure_ascii=False)
+        return "BUSY"
+    return "NAK"
 
-    return "OK" if status else abort(405)
+
+if __name__ == "__main__":
+    pos.initialization()
+    pos.polling()
+    print("Turn on socket")
+    app.run(debug=True, host='0.0.0.0', port=4001, use_reloader=False)
+

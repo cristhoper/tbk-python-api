@@ -24,3 +24,9 @@ class TransactionData(object):
             self.content[key] = value
         else:
             raise TypeError("key must be an string parameter")
+
+    def get_content(self):
+        if len(self.content) > 0:
+            return self.content
+        else:
+            return None
