@@ -41,6 +41,8 @@ class TbkPos(object):
     def __get_flags(in_stream, flag_number):
         i = 0
         flag = False
+        if len(in_stream) <= 0:
+            return flag
         data = in_stream.split("\\|")
         for token in data:
             if i == flag_number:

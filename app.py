@@ -55,7 +55,7 @@ def payment():
         return abort(405)
 
     t_id = int(data['transaction_id'])
-    amount = data['amount']
+    amount = int(data['amount'])
     if request.method in POST:
         if t_id not in transactions_in_progress.keys():
             pos_on_thread(amount, t_id)
