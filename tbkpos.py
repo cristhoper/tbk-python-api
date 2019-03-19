@@ -201,38 +201,61 @@ class TbkPos(object):
             print("More errors: {}".format(err))
         return obj
 
-    def sale_init(self, amount, voucher='0'):  # , **kwargs):
+    def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
         print("sale_init({}, {})".format(amount, voucher))
         obj = TransactionData()
         cmd = STX + "0200|" + str(amount) + "|" + str(voucher) + "|0|1" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
-        try:
-            result = obj.set_response(self.__execute(cmd_hex))
-            while result == ACK:
+        if not dummy:
+            try:
                 result = obj.set_response(self.__execute(cmd_hex))
-            flag = self.__get_flags(result, TX_RESPUESTA)
-            if flag:
-                obj.set_response_code(flag)
-                obj.set_text(self.__get_properties(flag))
-                if flag == "00":
-                    obj.result = True
-                    obj.add_content("num_voucher", voucher)  # VOUCHER INTERNO GENERADO POR MAPFRE
-                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
-                    obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
-                    obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
-                    obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
-                    obj.add_content("num_cuotas", self.__get_flags(result, VENTA_TX_NUMERO_CUOTAS))
-                    obj.add_content("monto_cuota", self.__get_flags(result, VENTA_TX_MONTO_CUOTA))
-                    obj.add_content("ult_4_numeros", self.__get_flags(result, VENTA_TX_ULT_4_DIGITOS))
-                    obj.add_content("codigo_operacion", self.__get_flags(result, VENTA_TX_CODIGO_OPERACION))  # CODIGO OPERACION TBK
-                    obj.add_content("tipo_tarjeta", self.__get_flags(result, VENTA_TX_TIPO_TARJETA))
-                    obj.add_content("codigo_tarjeta", self.__get_flags(result, VENTA_TX_CODIGO_TARJETA))
-                    obj.add_content("fecha", self.__get_flags(result, VENTA_TX_FECHA))
-                    obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA))
-            else:
-                obj.set_text(self.__get_properties(flag))
-                obj.add_content("status", "FAIL")
-            self.ack()
-        except IOError as err:
-            print("More errors: {}".format(err))
+                while result == ACK:
+                    result = obj.set_response(self.__execute(cmd_hex))
+                flag = self.__get_flags(result, TX_RESPUESTA)
+                if flag:
+                    obj.set_response_code(flag)
+                    obj.set_text(self.__get_properties(flag))
+                    if flag == "00":
+                        obj.result = True
+                        obj.add_content("num_voucher", voucher)  # VOUCHER INTERNO GENERADO POR MAPFRE
+                        obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
+                        obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
+                        obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
+                        obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
+                        obj.add_content("num_cuotas", self.__get_flags(result, VENTA_TX_NUMERO_CUOTAS))
+                        obj.add_content("monto_cuota", self.__get_flags(result, VENTA_TX_MONTO_CUOTA))
+                        obj.add_content("ult_4_numeros", self.__get_flags(result, VENTA_TX_ULT_4_DIGITOS))
+                        obj.add_content("codigo_operacion", self.__get_flags(result, VENTA_TX_CODIGO_OPERACION))  # CODIGO OPERACION TBK
+                        obj.add_content("tipo_tarjeta", self.__get_flags(result, VENTA_TX_TIPO_TARJETA))
+                        obj.add_content("codigo_tarjeta", self.__get_flags(result, VENTA_TX_CODIGO_TARJETA))
+                        obj.add_content("fecha", self.__get_flags(result, VENTA_TX_FECHA))
+                        obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA))
+                else:
+                    obj.set_text(self.__get_properties(flag))
+                    obj.add_content("status", "FAIL")
+                self.ack()
+            except IOError as err:
+                print("More errors: {}".format(err))
+        else:  # FIXME check for dummy values.
+            from random import randint
+            from datetime import datetime
+            obj.result = True
+            quote = randint(1, 4)
+            now = datetime.now()
+            fecha = now.strftime("%Y-%m-%d")
+            hora = now.strftime("%H:%M")
+            last_dig = '{:0>4}'.format(str(randint(0, 9999)))
+            obj.add_content("num_voucher", randint(1,voucher))  # VOUCHER INTERNO GENERADO POR MAPFRE
+            obj.add_content("codigo_comercio", "655550")
+            obj.add_content("terminal_id", "223")
+            obj.add_content("num_voucher_mapfre", voucher)  # VOUCHER MAPFRE RETORNADO POR TBK
+            obj.add_content("codigo_autorizacion", "6556")  # CODIGO AUTORIZACION TBK
+            obj.add_content("num_cuotas", quote)
+            obj.add_content("monto_cuota", amount//quote)
+            obj.add_content("ult_4_numeros", last_dig)
+            obj.add_content("codigo_operacion","555664")
+            obj.add_content("tipo_tarjeta", "D")
+            obj.add_content("codigo_tarjeta", "D")
+            obj.add_content("fecha", fecha)
+            obj.add_content("hora", hora)
         return obj

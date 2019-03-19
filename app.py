@@ -19,18 +19,18 @@ transactions_in_progress = {}
 safe_pos = RLock()
 
 
-def worker_sale(amount, transaction_id):
+def worker_sale(amount, transaction_id, dummy):
     safe_pos.acquire()
     print("Worker started")
     transactions_in_progress[transaction_id] = None
-    pos_status = pos.sale_init(amount, transaction_id)
+    pos_status = pos.sale_init(amount, transaction_id, dummy)
     transactions_in_progress[transaction_id] = pos_status
     print("Worker ended")
     safe_pos.release()
 
 
-def pos_on_thread(amount, transaction_id):
-    th_pos = Thread(target=worker_sale, args=(amount, transaction_id,))
+def pos_on_thread(amount, transaction_id, dummy=False):
+    th_pos = Thread(target=worker_sale, args=(amount, transaction_id, dummy,))
     th_pos.daemon = True
     try:
         th_pos.start()
@@ -56,9 +56,10 @@ def payment():
 
     t_id = int(data['transaction_id'])
     amount = int(data['amount'])
+    dummy = hasattr(data, 'dummy')
     if request.method in POST:
         if t_id not in transactions_in_progress.keys():
-            pos_on_thread(amount, t_id)
+            pos_on_thread(amount, t_id, dummy)
             return "ACK"
         else:
             return "BUSY"
