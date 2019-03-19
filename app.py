@@ -64,7 +64,7 @@ def payment():
 
     :returns
     """
-    data = request.get_json() if request.method in POST else None
+    data = request.get_json() if request.method in ['POST'] else None
 
     if data is None:
         return abort(405)
@@ -72,7 +72,7 @@ def payment():
     t_id = int(data['transaction_id'])
     amount = int(data['amount'])
     dummy = hasattr(data, 'dummy')
-    if request.method in POST:
+    if request.method in ['POST']:
         if t_id not in transactions_in_progress.keys():
             payment_on_thread(amount, t_id, dummy)
             return "ACK"
