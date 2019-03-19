@@ -1,7 +1,7 @@
 from json import dumps
 from threading import Thread, RLock
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
 
 DEVICE = "COM3"
@@ -71,7 +71,7 @@ def payment():
 
     t_id = int(data['transaction_id'])
     amount = int(data['amount'])
-    dummy = hasattr(data, 'dummy')
+    dummy = 'dummy' in data
     if request.method in ['POST']:
         if t_id not in transactions_in_progress.keys():
             payment_on_thread(amount, t_id, dummy)
@@ -102,7 +102,11 @@ def check(transaction_id):
         status = transactions_in_progress[transaction_id]
         if status is not None:
             content = status.get_content()
-            return dumps(content, ensure_ascii=False)
+            resp = Response(response=dumps(content, ensure_ascii=False),
+                            status=200,
+                            mimetype="application/json")
+
+            return resp
         return "BUSY"
     return "NAK"
 
