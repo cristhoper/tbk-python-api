@@ -1,4 +1,3 @@
-from queue import Queue
 from json import dumps
 from threading import Thread, RLock
 
