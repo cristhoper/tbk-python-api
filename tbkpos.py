@@ -202,7 +202,7 @@ class TbkPos(object):
         return obj
 
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
-        print("sale_init({}, {})".format(amount, voucher))
+        print("sale_init({}, {}, {})".format(amount, voucher, dummy))
         obj = TransactionData()
         cmd = STX + "0200|" + str(amount) + "|" + str(voucher) + "|0|1" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
