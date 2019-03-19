@@ -9,21 +9,19 @@ class TbkPos(object):
     lock = RLock()
     TERMINATOR = '\r'
 
-    def __init__(self, device, baudrate):
+    def __init__(self, device, baudrate=9600):
         self.ser = Serial(device, baudrate=baudrate, timeout=10)
         self.device = device
 
     def __execute(self, command):
         self.lock.acquire()
-##        self.ser.open()
         self.ser.write(command)
         val = ''
         cnt = 0
         while len(val) <=0 and cnt < MAX_ATTEMPT:
             print("Sending message {}".format(command))
             val = self.ser.readall()
-            cnt +=1
-##        self.ser.close()
+            cnt += 1
         self.lock.release()
         print("Received message {}".format(val))
         return val

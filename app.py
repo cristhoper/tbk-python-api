@@ -12,7 +12,7 @@ IP = "0.0.0.0"
 PORT = 4001
 
 app = Flask(__name__)
-pos = TbkPos(DEVICE, 9600)
+pos = TbkPos(DEVICE)
 
 
 transactions_in_progress = {}
