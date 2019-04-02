@@ -1,3 +1,5 @@
+import io
+
 from serial import Serial
 from threading import RLock
 from constants import *
@@ -10,17 +12,22 @@ class TbkPos(object):
     TERMINATOR = '\r'
 
     def __init__(self, device, baudrate=9600):
-        self.ser = Serial(device, baudrate=baudrate, timeout=10)
+        self.ser = Serial(device, baudrate=baudrate, timeout=60)
         self.device = device
 
     def __execute(self, command):
         self.lock.acquire()
+        open_port = self.ser.is_open
+        if not open_port:
+            self.ser.open()
+            open_port = True
+        print("Sending message {} {} (len:{})".format(open_port, command, len(command)))
         self.ser.write(command)
         val = ''
         cnt = 0
-        while len(val) <=0 and cnt < MAX_ATTEMPT:
-            print("Sending message {}".format(command))
-            val = self.ser.readall()
+        while len(val) <= 0 and cnt < MAX_ATTEMPT:
+            val = self.ser.read(10)
+            print("reading message {}".format(val))
             cnt += 1
         self.lock.release()
         print("Received message {}".format(val))
@@ -204,7 +211,7 @@ class TbkPos(object):
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
         print("sale_init({}, {}, {})".format(amount, voucher, dummy))
         obj = TransactionData()
-        cmd = STX + "0200|" + str(amount) + "|" + str(voucher) + "|0|1" + ETX
+        cmd = STX + "0200|000001000" + str(amount) + "|" + str(voucher) + "|0|1" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
         if not dummy:
             try:

@@ -2,8 +2,8 @@ def hex_string(s, crc=False):
     if crc:
         crc_val = get_hex_crc(s[1:])
         c = s + crc_val
-        return bytes(c, 'utf-8')
-    return bytes(s, 'utf-8')
+        return bytes(c)
+    return bytes(s)
 
 
 def get_hex_crc(s):

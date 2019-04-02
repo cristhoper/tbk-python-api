@@ -4,7 +4,8 @@ from threading import Thread, RLock
 from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
 
-DEVICE = "COM3"
+# DEVICE = "COM3"
+DEVICE = "/dev/ttyUSB0"
 IP = "0.0.0.0"
 PORT = 4001
 
@@ -112,7 +113,9 @@ def check(transaction_id):
 
 
 if __name__ == "__main__":
-    pos.ack()
+    pos.close()
+    pos.initialization()
     pos.polling()
+    pos.ack()
     app.run(debug=True, host=IP, port=PORT, use_reloader=False)
 
