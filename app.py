@@ -4,7 +4,7 @@ from threading import Thread, RLock
 from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
 
-DEVICE = "COM3"
+DEVICE = "COM9"
 IP = "0.0.0.0"
 PORT = 4001
 

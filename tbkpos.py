@@ -10,7 +10,7 @@ class TbkPos(object):
     TERMINATOR = '\r'
 
     def __init__(self, device, baudrate=9600):
-        self.ser = Serial(device, baudrate=baudrate, timeout=10)
+        self.ser = Serial(device, baudrate=baudrate, timeout=3)
         self.device = device
 
     def __execute(self, command):
