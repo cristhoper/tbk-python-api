@@ -2,4 +2,5 @@ setuptools
 json_rpc==1.10.3
 requests>=2.20.0
 flask==0.12.3
+flask_cors
 pyserial==3.3

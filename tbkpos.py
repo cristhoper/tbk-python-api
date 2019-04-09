@@ -3,7 +3,7 @@ from threading import RLock
 from constants import *
 import posutils
 from transaction import TransactionData
-
+from time import sleep
 
 class TbkPos(object):
     lock = RLock()
@@ -258,4 +258,6 @@ class TbkPos(object):
             obj.add_content("codigo_tarjeta", "D")
             obj.add_content("fecha", fecha)
             obj.add_content("hora", hora)
+            obj.add_content("status", "OK")
+            sleep(30)
         return obj

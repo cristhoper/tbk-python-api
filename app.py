@@ -3,12 +3,14 @@ from threading import Thread, RLock
 
 from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
+from flask_cors import CORS
 
 DEVICE = "COM9"
 IP = "0.0.0.0"
 PORT = 4001
 
 app = Flask(__name__)
+CORS(app)
 pos = TbkPos(DEVICE)
 
 
@@ -102,14 +104,14 @@ def check(transaction_id):
         status = transactions_in_progress[transaction_id]
         if status is not None:
             content = status.get_content()
-            resp = Response(response=dumps(content, ensure_ascii=False),
+        else:
+            content = {"status":"BUSY"}
+    else:
+        content = {"status":"FAIL"}
+    resp = Response(response=dumps(content, ensure_ascii=False),
                             status=200,
                             mimetype="application/json")
-
-            return resp
-        return "BUSY"
-    return "NAK"
-
+    return resp
 
 if __name__ == "__main__":
     pos.ack()
