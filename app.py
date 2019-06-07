@@ -64,7 +64,8 @@ def init():
     except RuntimeError as err:
         print("Issues in POS: {}".format(err.message))
     th_pos.join(30)
-    return get_init_data()
+    print(get_init_data())
+    return "OK"
 
 
 @app.route("/payment", methods=['POST'])
