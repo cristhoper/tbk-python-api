@@ -162,8 +162,6 @@ class TbkPos(object):
                     obj.add_content("codigo_tarjeta", self.__get_flags(result, VENTA_TX_CODIGO_TARJETA))
                     obj.add_content("fecha", self.__get_flags(result, VENTA_TX_FECHA_TRANSAC))
                     obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA_TRANSAC))
-                else:
-                    obj.set_text(self.__get_properties(flag))
             else:
                 obj.add_content("status", "FAIL")
             self.ack()
