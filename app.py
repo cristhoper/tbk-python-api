@@ -22,6 +22,8 @@ def worker_init():
     safe_pos.acquire()
     print("Init started")
     pos.close()
+    pos.load_keys()
+    pos.polling()
     print("init ended")
     safe_pos.release()
 
