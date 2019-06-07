@@ -118,7 +118,7 @@ def check(transaction_id):
         if status is not None:
             content = status.get_content()
             if content is None:
-                content = {"code": content.response_code, "message": content.text, "status": "FAIL"}
+                content = {"code": status.response_code, "message": status.text, "status": "FAIL"}
         else:
             content = {"status":"BUSY"}
     else:
