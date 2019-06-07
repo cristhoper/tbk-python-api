@@ -117,10 +117,12 @@ def check(transaction_id):
         status = transactions_in_progress[transaction_id]
         if status is not None:
             content = status.get_content()
+            if content is None:
+                content = {"code": status.response_code, "message": status.text, "status": "FAIL"}
         else:
             content = {"status":"BUSY"}
     else:
-        content = {"status":"FAIL"}
+        content = {"status": "FAIL"}
     resp = Response(response=dumps(content, ensure_ascii=False),
                             status=200,
                             mimetype="application/json")
