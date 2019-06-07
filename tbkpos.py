@@ -149,18 +149,19 @@ class TbkPos(object):
                 if flag == "00":
                     obj.result = True
                     obj.add_content("num_voucher", voucher)  # VOUCHER INTERNO GENERADO POR MAPFRE
-                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
+                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO)) # 2
                     obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
                     obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
                     obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
-                    obj.add_content("num_cuotas", self.__get_flags(result, VENTA_TX_NUMERO_CUOTAS))
-                    obj.add_content("monto_cuota", self.__get_flags(result, VENTA_TX_MONTO_CUOTA))
+                    obj.add_content("num_cuotas", self.__get_flags(result, VENTA_OP_NUMERO_CUOTAS))
+                    obj.add_content("monto_cuota", self.__get_flags(result, VENTA_OP_MONTO_CUOTA))
+                    obj.add_content("monto", self.__get_flags(result, VENTA_TX_MONTO))
                     obj.add_content("ult_4_numeros", self.__get_flags(result, VENTA_TX_ULT_4_DIGITOS))
                     obj.add_content("codigo_operacion", self.__get_flags(result, VENTA_TX_CODIGO_OPERACION))  # CODIGO OPERACION TBK
                     obj.add_content("tipo_tarjeta", self.__get_flags(result, VENTA_TX_TIPO_TARJETA))
                     obj.add_content("codigo_tarjeta", self.__get_flags(result, VENTA_TX_CODIGO_TARJETA))
-                    obj.add_content("fecha", self.__get_flags(result, VENTA_TX_FECHA))
-                    obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA))
+                    obj.add_content("fecha", self.__get_flags(result, VENTA_TX_FECHA_TRANSAC))
+                    obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA_TRANSAC))
                 else:
                     obj.set_text(self.__get_properties(flag))
             else:
