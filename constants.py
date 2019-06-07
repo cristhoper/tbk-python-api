@@ -1,8 +1,9 @@
 STX = chr(0x02)
 ETX = chr(0x03)
 ACK = chr(0x06)
+NAK = chr(0x15)
 
-MAX_ATTEMPT = 5
+MAX_ATTEMPT = 3
 
 MSG_RESPUESTA = "'"
 MSG_TIP_TARJETA = "pos.messaje.tarjeta_"
@@ -40,24 +41,20 @@ TOKEN_PROPERTIES = {
     '11': 'No existe venta.',
     '12': 'Transacci\u00f3n No Soportada.',
     '13': 'Debe ejecutar cierre.',
-    '14': 'No hay Tono.',
-    '15': 'Archivo BITMAP.DAT no encontrado. Favor cargue.',
-    '16': 'Error Formato Respuesta del HOST.',
-    '17': 'Error en los 4 \u00faltimos d\u00edgitos.',
-    '18': 'Men\u00fa invalido.',
-    '19': 'ERROR_TARJ_DIST.',
-    '20': 'Tarjeta Invalida.',
-    '21': 'Anulaci\u00f3n. No Permitida.',
-    '22': 'TIMEOUT.',
-    '24': 'Impresora Sin Papel.',
-    '25': 'Fecha Invalida.',
-    '26': 'Debe Cargar Llaves.',
-    '57': 'Digito verificador no corresponde.',
-    '68': 'Tarjeta con fecha expirada.',
-    '70': 'Error de formato Campo de Boleta MAX 6.',
+    '14': 'Error encriptando PAN',
+    '15': 'Error operando con debito',
     '80': 'Solicitando Conformar Monto.',
     '81': 'Solicitando Ingreso de Clave.',
     '82': 'Enviando transacci\u00f3n al Host.',
-    '88': 'Error Cantidad Cuotas.',
+    '83': 'Seleccion de menu',
+    '84': 'Opere tarjeta',
+    '85': 'Seleccion de cuotas',
+    '86': 'Ingreso de cuotas',
+    '87': 'Confirmacion de cuotas',
+    '88': 'Aceptar consulta de Cuotas.',
+    '89': 'Opcion mes de gracia',
+    '90': 'Inicializacion exitosa.',
+    '91': 'Inicializacion fallida',
+    '92': 'Lector no conectado',
     '93': 'Declinada.',
 }
