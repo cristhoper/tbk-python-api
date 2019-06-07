@@ -165,7 +165,6 @@ class TbkPos(object):
                     obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA_TRANSAC))
             else:
                 obj.add_content("status", "FAIL")
-            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
