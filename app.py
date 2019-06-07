@@ -16,16 +16,24 @@ pos = TbkPos(DEVICE)
 
 transactions_in_progress = {}
 safe_pos = RLock()
+init_log = []
+
+
+def get_init_data():
+    global init_log
+    return init_log
 
 
 def worker_init():
-    safe_pos.acquire()
+    global init_log
+    init_log = []
     print("Init started")
-    pos.close()
-    pos.load_keys()
-    pos.polling()
-    print("init ended")
+    safe_pos.acquire()
+    init_log.append(pos.close())
+    init_log.append(pos.load_keys())
+    init_log.append(pos.polling())
     safe_pos.release()
+    print("init ended")
 
 
 def worker_sale(amount, transaction_id, dummy=False):
@@ -55,6 +63,8 @@ def init():
         th_pos.start()
     except RuntimeError as err:
         print("Issues in POS: {}".format(err.message))
+    th_pos.join(30)
+    return get_init_data()
 
 
 @app.route("/payment", methods=['POST'])
