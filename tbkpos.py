@@ -60,7 +60,7 @@ class TbkPos(object):
             if i == flag_number:
                 flag = token
             i += 1
-        if not flag and flag_number == VENTA_TX_MONTO_CUOTA:
+        if not flag and flag_number == VENTA_OP_MONTO_CUOTA:
             flag = "0"
         if flag_number == TX_TERMINAL_ID:
             separator = ""+ETX
@@ -140,8 +140,12 @@ class TbkPos(object):
             result = obj.set_response(self.__execute(cmd_hex))
             if result[0] == ACK:
                 result = obj.set_response(self.__wait_data()[2:-2])
-                result = obj.set_response(self.__wait_data(180)[2:-2])
                 flag = self.__get_flags(result, TX_RESPUESTA)
+            if flag in TOKEN_PROPERTIES.keys():
+                while 79 < int(flag) < 90:
+                    weird_msg = self.__wait_data(180)[2:-2]
+                    result = obj.set_response(weird_msg)
+                    flag = self.__get_flags(result, TX_RESPUESTA)
             if flag:
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
