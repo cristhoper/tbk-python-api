@@ -80,7 +80,6 @@ class TbkPos(object):
                 obj.set_text("Inicializado")
             else:
                 obj.set_text("Problema al conectar")
-            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
@@ -103,18 +102,15 @@ class TbkPos(object):
         try:
             result = obj.set_response(self.__execute(cmd_hex))
             if result[0] == ACK:
-                result = obj.set_response(self.__wait_data()[2:-2])
+                result = obj.set_response(self.__wait_data(30)[2:-2])
             flag = self.__get_flags(result, TX_RESPUESTA)
             obj.set_response_code(flag)
             if flag == "00":
                 obj.result = True
                 obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
                 obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
-                self.COD_COMER = obj.get_content("codigo_comercio")
-                self.TER_ID = obj.get_content("terminal_id")
         except IOError as err:
             print("More errors: {}".format(err))
-        self.ack()
         return obj
                                               
     def polling(self):
@@ -131,7 +127,6 @@ class TbkPos(object):
                 obj.set_text("Puerto incorrecto, intente con otro puerto.")
         except IOError as err:
             print("More errors: {}".format(err))
-        self.ack()
         return obj
 
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
@@ -211,7 +206,6 @@ class TbkPos(object):
             flag = self.__get_flags(result, TX_RESPUESTA)
             obj.set_text(self.__get_properties(flag))
             obj.set_response_code(flag)
-            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
