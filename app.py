@@ -29,10 +29,14 @@ def worker_init():
     init_log = []
     print("Init started")
     safe_pos.acquire()
-    init_log.append(pos.close())
-    init_log.append(pos.initialization())
-    init_log.append(pos.load_keys())
-    init_log.append(pos.polling())
+    _l = pos.close()
+    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    _l = pos.initialization()
+    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    _l = pos.load_keys()
+    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    _l = pos.polling()
+    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
     safe_pos.release()
     print("init ended")
 
