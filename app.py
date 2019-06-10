@@ -5,7 +5,10 @@ from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
 from flask_cors import CORS
 
-DEVICE = "COM11"
+from os import name
+DEVICE = "/dev/ttyUSB0"
+if name == 'nt':
+    DEVICE = "COM11"
 IP = "0.0.0.0"
 PORT = 4001
 
