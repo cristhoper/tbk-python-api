@@ -146,8 +146,8 @@ class TbkPos(object):
                     weird_msg = self.__wait_data(10)[2:-2]
                     print(weird_msg)
                     found = 0
-                    if weird_msg[0:4] == "0210":
-                        break
+                    # if weird_msg[0:4] == "0210":
+                    #     break
                     for i in range(len(weird_msg)-2):
                         if ord(weird_msg[i]) == 2 and ord(weird_msg[i+2]) == 3:
                             found = i+2
@@ -176,6 +176,7 @@ class TbkPos(object):
                     obj.add_content("hora", self.__get_flags(result, VENTA_TX_HORA_TRANSAC))
             else:
                 obj.add_content("status", "FAIL")
+            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
