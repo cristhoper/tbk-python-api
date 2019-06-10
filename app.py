@@ -139,7 +139,6 @@ def check(transaction_id):
 
 
 if __name__ == "__main__":
-    pos.ack()
     pos.polling()
     app.run(debug=True, host=IP, port=PORT, use_reloader=False)
-
+    worker_init()
