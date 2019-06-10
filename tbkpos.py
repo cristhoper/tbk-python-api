@@ -142,7 +142,7 @@ class TbkPos(object):
                 result = obj.set_response(self.__wait_data()[2:-2])
                 flag = self.__get_flags(result, TX_RESPUESTA)
             if flag in TOKEN_PROPERTIES.keys():
-                while 79 < int(flag) < 90:
+                while 79 < int(flag[0:2]) < 90:
                     weird_msg = self.__wait_data(180)[2:-2]
                     found = 0
                     for i in range(len(weird_msg)-2):
