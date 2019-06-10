@@ -146,6 +146,8 @@ class TbkPos(object):
             if result[0] == ACK:
                 result = obj.set_response(self.__wait_data()[2:-2])
                 flag = self.__get_flags(result, TX_RESPUESTA)
+                result = obj.set_response(self.__wait_data()[2:-2])
+                flag = self.__get_flags(result, TX_RESPUESTA)
             if flag:
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
