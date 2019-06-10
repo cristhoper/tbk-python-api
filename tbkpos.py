@@ -3,7 +3,8 @@ from threading import RLock
 from constants import *
 import posutils
 from transaction import TransactionData
-from time import sleep
+from time import sleep, time
+
 
 class TbkPos(object):
     lock = RLock()    
@@ -11,8 +12,6 @@ class TbkPos(object):
     def __init__(self, device, baudrate=115200):
         self.ser = Serial(device, baudrate=baudrate, timeout=3)
         self.device = device
-        COD_COMER = ''
-        TER_ID = ''
 
     def __execute(self, command):
         self.lock.acquire()
@@ -30,10 +29,13 @@ class TbkPos(object):
         print("Received message {}".format(val))
         return val.decode('utf-8')
 
-    def __wait_data(self):
+    def __wait_data(self, timeout=10):
         val = ''
-        while len(val) <= 0:
+        c_t = 0
+        i_t = time()
+        while len(val) <= 0 and c_t - i_t < timeout:
             val = self.ser.readall()
+            c_t = time()
         return val.decode('utf-8')
 
     @staticmethod
