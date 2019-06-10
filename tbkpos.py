@@ -144,7 +144,12 @@ class TbkPos(object):
             if flag in TOKEN_PROPERTIES.keys():
                 while 79 < int(flag) < 90:
                     weird_msg = self.__wait_data(180)[2:-2]
-                    result = obj.set_response(weird_msg)
+                    found = 0
+                    for i in range(len(weird_msg)-2):
+                        if weird_msg[i] == b'\0x02' and weird_msg[i+2] == b'\0x03':
+                            found = i
+                            break
+                    result = obj.set_response(weird_msg[found:-1])
                     flag = self.__get_flags(result, TX_RESPUESTA)
             if flag:
                 obj.set_response_code(flag)
@@ -156,7 +161,7 @@ class TbkPos(object):
                     obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
                     obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
                     obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
-                    obj.add_content("num_cuotas", self.__get_flags(result, VENTA_OP_NUMERO_CUOTAS))
+                    obj.add_content("num_cuotas", self.__get_flags(result, VENTA_OP_NUM_CUOTA))
                     obj.add_content("monto_cuota", self.__get_flags(result, VENTA_OP_MONTO_CUOTA))
                     obj.add_content("monto", self.__get_flags(result, VENTA_TX_MONTO))
                     obj.add_content("ult_4_numeros", self.__get_flags(result, VENTA_TX_ULT_4_DIGITOS))
