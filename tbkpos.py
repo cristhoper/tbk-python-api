@@ -20,7 +20,7 @@ class TbkPos(object):
         self.ser.write(command)
         val = self.ser.readall()
         cnt = 0
-        while len(val) <=0 and cnt < MAX_ATTEMPT:
+        while len(val) <= 0 and cnt < MAX_ATTEMPT:
             print("Sending message {}".format(command))
             self.ser.write(command)
             val = self.ser.readall()
@@ -145,8 +145,7 @@ class TbkPos(object):
             result = obj.set_response(self.__execute(cmd_hex))
             if result[0] == ACK:
                 result = obj.set_response(self.__wait_data()[2:-2])
-                flag = self.__get_flags(result, TX_RESPUESTA)
-                result = obj.set_response(self.__wait_data()[2:-2])
+                result = obj.set_response(self.__wait_data(180)[2:-2])
                 flag = self.__get_flags(result, TX_RESPUESTA)
             if flag:
                 obj.set_response_code(flag)
