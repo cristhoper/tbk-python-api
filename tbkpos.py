@@ -146,10 +146,10 @@ class TbkPos(object):
                     weird_msg = self.__wait_data(10)[2:-2]
                     print(weird_msg)
                     found = 0
-                    if weird_msg[0:3] == "210":
+                    if weird_msg[0:4] == "0210":
                         break
                     for i in range(len(weird_msg)-2):
-                        if weird_msg[i] == b'\0x02' and weird_msg[i+2] == b'\0x03':
+                        if int(weird_msg[i]) == 2 and int(weird_msg[i+2]) == 3:
                             found = i+2
                             break
 
