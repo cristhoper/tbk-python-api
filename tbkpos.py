@@ -149,7 +149,7 @@ class TbkPos(object):
                     if weird_msg[0:4] == "0210":
                         break
                     for i in range(len(weird_msg)-2):
-                        if int(weird_msg[i]) == 2 and int(weird_msg[i+2]) == 3:
+                        if ord(weird_msg[i]) == 2 and ord(weird_msg[i+2]) == 3:
                             found = i+2
                             break
 
