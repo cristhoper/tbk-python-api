@@ -68,7 +68,7 @@ def init():
         th_pos.start()
     except RuntimeError as err:
         print("Issues in POS: {}".format(err.message))
-    th_pos.join()
+    th_pos.join(30)
     print(get_init_data())
     return "OK"
 
