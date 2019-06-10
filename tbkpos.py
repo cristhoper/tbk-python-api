@@ -13,6 +13,26 @@ class TbkPos(object):
         self.ser = Serial(device, baudrate=baudrate, timeout=3)
         self.device = device
 
+    @staticmethod
+    def __extract_messages(in_stream):
+        messages = []
+        for index in range(len(in_stream)):
+            msg_init_index = -1
+            msg_end_index = -1
+            done_msg = False
+            if ord(in_stream[index]) == ord(ACK):
+                messages.append(in_stream[index].decode('utf-8'))
+            if ord(in_stream[index]) == ord(STX):
+                msg_init_index = index
+            if ord(in_stream[index]) == ord(ETX):
+                msg_end_index = index + 1
+                done_msg = True and msg_init_index != -1
+            if done_msg:
+                messages.append(in_stream[msg_init_index:msg_end_index].decode('utf-8'))
+        print("__extracted message")
+        print(messages)
+        return messages
+
     def __execute(self, command):
         self.lock.acquire()
         print("Sending message {}".format(command))
@@ -27,7 +47,8 @@ class TbkPos(object):
             cnt += 1
         self.lock.release()
         print("Received message {}".format(val))
-        return val.decode('utf-8')
+        ret = self.__extract_messages(val)
+        return ret
 
     def __wait_data(self, timeout=10):
         val = ''
@@ -36,7 +57,8 @@ class TbkPos(object):
         while len(val) <= 0 and c_t - i_t < timeout:
             val = self.ser.readall()
             c_t = time()
-        return val.decode('utf-8')
+
+        return self.__extract_messages(val)
 
     @staticmethod
     def __get_properties(token):
@@ -74,12 +96,14 @@ class TbkPos(object):
         cmd = STX + "0070" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
         try:
-            result = obj.set_response(self.__execute(cmd_hex))
-            if result == ACK:
-                obj.result = True
-                obj.set_text("Inicializado")
-            else:
+            results = obj.set_response(self.__execute(cmd_hex))
+            for result in results:
                 obj.set_text("Problema al conectar")
+                if result == ACK:
+                    obj.result = True
+                    obj.set_text("Inicializado")
+                    break
+
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
@@ -100,10 +124,12 @@ class TbkPos(object):
         cmd = STX + "0800" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
         try:
-            result = obj.set_response(self.__execute(cmd_hex))
-            if result[0] == ACK:
-                result = obj.set_response(self.__wait_data(30)[2:-2])
-            flag = self.__get_flags(result, TX_RESPUESTA)
+            results = obj.set_response(self.__execute(cmd_hex))
+            for result in results:
+                if result == ACK:
+                    break
+            results = obj.set_response(self.__wait_data(30))
+            flag = self.__get_flags(results[1], TX_RESPUESTA)
             obj.set_response_code(flag)
             if flag == "00":
                 obj.result = True
@@ -119,8 +145,8 @@ class TbkPos(object):
         cmd = STX + "0100" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
         try:
-            result = obj.set_response(self.__execute(cmd_hex))
-            if result == ACK:
+            results = obj.set_response(self.__execute(cmd_hex))
+            if results[0] == ACK:
                 obj.result = True
                 obj.set_text("Conexion establecida en puerto: {}".format(str(self.device)))
             else:
@@ -137,34 +163,26 @@ class TbkPos(object):
         cmd_hex = posutils.hex_string(cmd, crc=True)
         flag = False
         try:
-            result = obj.set_response(self.__execute(cmd_hex))
-            if result[0] == ACK:
-                result = obj.set_response(self.__wait_data()[2:-2])
+            results = obj.set_response(self.__execute(cmd_hex))
+            if results[0] == ACK:
+                results = obj.set_response(self.__wait_data())
+            result = None
+            for result in results:
                 flag = self.__get_flags(result, TX_RESPUESTA)
-            if flag in TOKEN_PROPERTIES.keys():
                 while 79 < int(flag[0:2]) < 90 or int(flag[0:1]) == 8:
-                    weird_msg = self.__wait_data(10)[2:-2]
-                    print(weird_msg)
-                    found = 0
-                    # if weird_msg[0:4] == "0210":
-                    #     break
-                    for i in range(len(weird_msg)-2):
-                        if ord(weird_msg[i]) == 2 and ord(weird_msg[i+2]) == 3:
-                            found = i+2
-                            break
-
-                    result = obj.set_response(weird_msg[found:-1])
+                    result = obj.set_response(self.__wait_data(10))
                     flag = self.__get_flags(result, TX_RESPUESTA)
+
             if flag:
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
                 if flag == "00":
                     obj.result = True
-                    obj.add_content("num_voucher", voucher)  # VOUCHER INTERNO GENERADO POR MAPFRE
-                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO)) # 2
+                    obj.add_content("num_voucher", voucher)
+                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
                     obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
-                    obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
-                    obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
+                    obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))
+                    obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))
                     obj.add_content("num_cuotas", self.__get_flags(result, VENTA_OP_NUM_CUOTA))
                     obj.add_content("monto_cuota", self.__get_flags(result, VENTA_OP_MONTO_CUOTA))
                     obj.add_content("monto", self.__get_flags(result, VENTA_TX_MONTO))
