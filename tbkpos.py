@@ -147,7 +147,7 @@ class TbkPos(object):
                     found = 0
                     for i in range(len(weird_msg)-2):
                         if weird_msg[i] == b'\0x02' and weird_msg[i+2] == b'\0x03':
-                            found = i
+                            found = i+2
                             break
                     result = obj.set_response(weird_msg[found:-1])
                     flag = self.__get_flags(result, TX_RESPUESTA)
