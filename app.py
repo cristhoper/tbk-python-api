@@ -30,6 +30,7 @@ def worker_init():
     print("Init started")
     safe_pos.acquire()
     init_log.append(pos.close())
+    init_log.append(pos.initialization())
     init_log.append(pos.load_keys())
     init_log.append(pos.polling())
     safe_pos.release()
@@ -103,9 +104,9 @@ def check(transaction_id):
 
     :returns 404 if transaction_id doesn't exists, json POST otherwise.
     {
-    "transaction_id": string,
-    "approval_code": string,
-    "print_data": string,
+    "status": string, # OK on success.
+    "code": string, # in case of known erros
+    "message": string, # in case of known erros
     ...
     }
     """
@@ -119,14 +120,19 @@ def check(transaction_id):
             content = status.get_content()
             if content is None:
                 content = {"code": status.response_code, "message": status.text, "status": "FAIL"}
+            else:
+                content["code"] = status.response_code
+                content["message"] = status.text
+                content["status"] = "OK"
         else:
-            content = {"status":"BUSY"}
+            content = {"status": "BUSY"}
     else:
         content = {"status": "FAIL"}
     resp = Response(response=dumps(content, ensure_ascii=False),
-                            status=200,
-                            mimetype="application/json")
+                    status=200,
+                    mimetype="application/json")
     return resp
+
 
 if __name__ == "__main__":
     pos.ack()
