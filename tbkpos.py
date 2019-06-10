@@ -20,7 +20,7 @@ class TbkPos(object):
         self.ser.write(command)
         val = self.ser.readall()
         cnt = 0
-        while len(val) <=0 and cnt < MAX_ATTEMPT:
+        while len(val) <= 0 and cnt < MAX_ATTEMPT:
             print("Sending message {}".format(command))
             self.ser.write(command)
             val = self.ser.readall()
@@ -60,7 +60,7 @@ class TbkPos(object):
             if i == flag_number:
                 flag = token
             i += 1
-        if not flag and flag_number == VENTA_TX_MONTO_CUOTA:
+        if not flag and flag_number == VENTA_OP_MONTO_CUOTA:
             flag = "0"
         if flag_number == TX_TERMINAL_ID:
             separator = ""+ETX
@@ -80,7 +80,6 @@ class TbkPos(object):
                 obj.set_text("Inicializado")
             else:
                 obj.set_text("Problema al conectar")
-            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
@@ -103,18 +102,15 @@ class TbkPos(object):
         try:
             result = obj.set_response(self.__execute(cmd_hex))
             if result[0] == ACK:
-                result = obj.set_response(self.__wait_data()[2:-2])
+                result = obj.set_response(self.__wait_data(30)[2:-2])
             flag = self.__get_flags(result, TX_RESPUESTA)
             obj.set_response_code(flag)
             if flag == "00":
                 obj.result = True
                 obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
                 obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
-                self.COD_COMER = obj.get_content("codigo_comercio")
-                self.TER_ID = obj.get_content("terminal_id")
         except IOError as err:
             print("More errors: {}".format(err))
-        self.ack()
         return obj
                                               
     def polling(self):
@@ -131,7 +127,6 @@ class TbkPos(object):
                 obj.set_text("Puerto incorrecto, intente con otro puerto.")
         except IOError as err:
             print("More errors: {}".format(err))
-        self.ack()
         return obj
 
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
@@ -146,8 +141,11 @@ class TbkPos(object):
             if result[0] == ACK:
                 result = obj.set_response(self.__wait_data()[2:-2])
                 flag = self.__get_flags(result, TX_RESPUESTA)
-                result = obj.set_response(self.__wait_data()[2:-2])
-                flag = self.__get_flags(result, TX_RESPUESTA)
+            if flag in TOKEN_PROPERTIES.keys():
+                while 79 < int(flag) < 90:
+                    weird_msg = self.__wait_data(180)[2:-2]
+                    result = obj.set_response(weird_msg)
+                    flag = self.__get_flags(result, TX_RESPUESTA)
             if flag:
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
@@ -212,7 +210,6 @@ class TbkPos(object):
             flag = self.__get_flags(result, TX_RESPUESTA)
             obj.set_text(self.__get_properties(flag))
             obj.set_response_code(flag)
-            self.ack()
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
