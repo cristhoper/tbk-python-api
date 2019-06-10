@@ -178,11 +178,11 @@ class TbkPos(object):
                 obj.set_text(self.__get_properties(flag))
                 if flag == "00":
                     obj.result = True
-                    obj.add_content("num_voucher", voucher)  # VOUCHER INTERNO GENERADO POR MAPFRE
-                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO)) # 2
+                    obj.add_content("num_voucher", voucher)
+                    obj.add_content("codigo_comercio", self.__get_flags(result, TX_CODIGO_COMERCIO))
                     obj.add_content("terminal_id", self.__get_flags(result, TX_TERMINAL_ID))
-                    obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))# VOUCHER MAPFRE RETORNADO POR TBK
-                    obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))  # CODIGO AUTORIZACION TBK
+                    obj.add_content("num_voucher_mapfre", self.__get_flags(result, VENTA_TX_NUM_VOUCHER_MAPFRE))
+                    obj.add_content("codigo_autorizacion", self.__get_flags(result, VENTA_TX_CODIGO_AUTORIZACION))
                     obj.add_content("num_cuotas", self.__get_flags(result, VENTA_OP_NUM_CUOTA))
                     obj.add_content("monto_cuota", self.__get_flags(result, VENTA_OP_MONTO_CUOTA))
                     obj.add_content("monto", self.__get_flags(result, VENTA_TX_MONTO))
