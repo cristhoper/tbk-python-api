@@ -5,7 +5,10 @@ from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
 from flask_cors import CORS
 
-DEVICE = "COM11"
+from os import name
+DEVICE = "/dev/ttyUSB0"
+if name == 'nt':
+    DEVICE = "COM11"
 IP = "0.0.0.0"
 PORT = 4001
 
@@ -16,27 +19,22 @@ pos = TbkPos(DEVICE)
 
 transactions_in_progress = {}
 safe_pos = RLock()
-init_log = []
-
-
-def get_init_data():
-    global init_log
-    return init_log
+init_status = False
 
 
 def worker_init():
-    global init_log
-    init_log = []
     print("Init started")
     safe_pos.acquire()
     _l = pos.close()
-    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
     _l = pos.initialization()
-    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
     _l = pos.load_keys()
-    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
     _l = pos.polling()
-    init_log.append("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+    global init_status
+    init_status = True
     safe_pos.release()
     print("init ended")
 
@@ -62,15 +60,9 @@ def payment_on_thread(amount, transaction_id, dummy=False):
 
 @app.route("/init", methods=['POST', 'GET'])
 def init():
-    th_pos = Thread(target=worker_init)
-    th_pos.daemon = True
-    try:
-        th_pos.start()
-    except RuntimeError as err:
-        print("Issues in POS: {}".format(err.message))
-    th_pos.join(30)
-    print(get_init_data())
-    return "OK"
+    if init_status:
+        return "OK"
+    return "WAIT"
 
 
 @app.route("/payment", methods=['POST'])
@@ -127,7 +119,6 @@ def check(transaction_id):
             else:
                 content["code"] = status.response_code
                 content["message"] = status.text
-                content["status"] = "OK"
         else:
             content = {"status": "BUSY"}
     else:
@@ -140,5 +131,5 @@ def check(transaction_id):
 
 if __name__ == "__main__":
     pos.polling()
-    app.run(debug=True, host=IP, port=PORT, use_reloader=False)
     worker_init()
+    app.run(debug=True, host=IP, port=PORT, use_reloader=False)
