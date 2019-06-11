@@ -6,15 +6,20 @@ from tbkpos import TbkPos
 from flask_cors import CORS
 
 from os import name
-DEVICE = "/dev/ttyUSB0"
+DEVICE_LIST = ["/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3"]
 if name == 'nt':
-    DEVICE = "COM11"
+    DEVICE = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10", "COM11", "COM12"]
 IP = "0.0.0.0"
 PORT = 4001
 
 app = Flask(__name__)
 CORS(app)
-pos = TbkPos(DEVICE)
+
+pos = None
+for device in DEVICE_LIST:
+    pos = TbkPos(device)
+    if pos.device:
+        break
 
 
 transactions_in_progress = {}
@@ -130,6 +135,10 @@ def check(transaction_id):
 
 
 if __name__ == "__main__":
-    pos.polling()
-    worker_init()
-    app.run(debug=True, host=IP, port=PORT, use_reloader=False)
+    if pos.device:
+        pos.polling()
+        worker_init()
+        app.run(debug=True, host=IP, port=PORT, use_reloader=False)
+    else:
+        print("ERROR: There is no connection to the POS")
+        exit(1)

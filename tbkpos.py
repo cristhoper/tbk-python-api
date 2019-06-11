@@ -10,8 +10,13 @@ class TbkPos(object):
     lock = RLock()    
 
     def __init__(self, device, baudrate=115200):
-        self.ser = Serial(device, baudrate=baudrate, timeout=3)
-        self.device = device
+        self.ser = None
+        self.device = None
+        try:
+            self.ser = Serial(device, baudrate=baudrate, timeout=3)
+            self.device = device
+        except:
+            pass
 
     def __execute(self, command, nowait=False):
         self.lock.acquire()
