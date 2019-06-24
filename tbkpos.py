@@ -21,15 +21,19 @@ class TbkPos(object):
     def __execute(self, command, nowait=False):
         self.lock.acquire()
         print("Sending message {}".format(command))
-        self.ser.flush()
-        self.ser.write(command)
-        val = self.ser.readall()
-        cnt = 0
-        while len(val) <= 0 and cnt < MAX_ATTEMPT and not nowait:
-            print("Sending message {}".format(command))
+        val = ""
+        try:
+            self.ser.flush()
             self.ser.write(command)
             val = self.ser.readall()
-            cnt += 1
+            cnt = 0
+            while len(val) <= 0 and cnt < MAX_ATTEMPT and not nowait:
+                print("Sending message {}".format(command))
+                self.ser.write(command)
+                val = self.ser.readall()
+                cnt += 1
+        except AttributeError as err:
+            print(err.message)
         self.lock.release()
         print("Received message {}".format(val))
         ret = self.__extract_messages(val.decode('utf-8'))
@@ -91,6 +95,12 @@ class TbkPos(object):
             flag = parts[0]
         return flag
 
+    def all(self):
+        self.close()
+        self.polling()
+        self.initialization()
+        self.load_keys()
+
     def initialization(self):
         print("POS initialization...")
         obj = TransactionData()
@@ -149,6 +159,8 @@ class TbkPos(object):
         cmd_hex = posutils.hex_string(cmd, crc=True)
         try:
             results = obj.set_response(self.__execute(cmd_hex))
+            if len(results) == 0:
+                raise IOError("Empty result")
             if results[0] == ACK:
                 obj.result = True
                 obj.set_text("Conexion establecida en puerto: {}".format(str(self.device)))

@@ -8,7 +8,7 @@ from flask_cors import CORS
 from os import name
 DEVICE_LIST = ["/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3"]
 if name == 'nt':
-    DEVICE = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10", "COM11", "COM12"]
+    DEVICE_LIST = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10", "COM11", "COM12"]
 IP = "0.0.0.0"
 PORT = 4001
 
@@ -24,24 +24,67 @@ for device in DEVICE_LIST:
 
 transactions_in_progress = {}
 safe_pos = RLock()
-init_status = False
+init_status = {"type": None, "state": False, "response": None}
+
+INIT = "init"
+POLLING = "polling"
+CLOSE_POS = "close_pos"
+LOAD_KEYS = "load_keys"
+
+pos_states = {
+    INIT: pos.initialization,
+    POLLING: pos.polling,
+    CLOSE_POS: pos.close,
+    LOAD_KEYS: pos.load_keys,
+}
 
 
-def worker_init():
-    print("Init started")
-    safe_pos.acquire()
-    _l = pos.close()
-    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
-    _l = pos.initialization()
-    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
-    _l = pos.load_keys()
-    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
-    _l = pos.polling()
-    print("{}:{} ({})".format(_l.response_code, _l.text, _l.response,))
+@app.route("/pos/<pos_type>", methods=['GET'])
+def init(pos_type):
     global init_status
-    init_status = True
+
+    if pos_type not in pos_states.keys():
+
+        return "KNOWN TYPES: {}".format(pos_states.keys())
+
+    if not init_status["state"]:
+        init_status["type"] = pos_type
+        launch_worker(pos_type=init_status["type"])
+        return "STARTING"
+
+    elif init_status["state"] and init_status["response"] is not None:
+        _l = init_status["response"]
+        data = dumps(_l.json())
+        print(data)
+        resp = Response(response=data,
+                        status=200,
+                        mimetype="application/json")
+        init_status = {"type": None, "state": False, "response": None}
+        return resp
+    return "RUNNING"
+
+
+def launch_worker(pos_type=None):
+    global init_status
+    th_pos = Thread(target=worker_type, args=(pos_type,))
+    th_pos.daemon = True
+    init_status = {"type": pos_type, "state": True, "response": None}
+    try:
+        th_pos.start()
+    except Exception as err:
+        print("Issues in POS: {}".format(err.message))
+
+
+def worker_type(pos_type=None):
+    if pos_type is None:
+        return
+    safe_pos.acquire()
+    print("{} started".format(pos_type))
+    _l = pos_states[pos_type]()
+    global init_status
+    init_status = {"type": pos_type, "state": True, "response": _l}
     safe_pos.release()
-    print("init ended")
+    print("{} ended".format(pos_type))
 
 
 def worker_sale(amount, transaction_id, dummy=False):
@@ -61,13 +104,6 @@ def payment_on_thread(amount, transaction_id, dummy=False):
         th_pos.start()
     except RuntimeError as err:
         print("Issues in POS: {}".format(err.message))
-
-
-@app.route("/init", methods=['POST', 'GET'])
-def init():
-    if init_status:
-        return "OK"
-    return "WAIT"
 
 
 @app.route("/payment", methods=['POST'])
@@ -136,8 +172,7 @@ def check(transaction_id):
 
 if __name__ == "__main__":
     if pos.device:
-        pos.polling()
-        worker_init()
+        pos.all()
         app.run(debug=True, host=IP, port=PORT, use_reloader=False)
     else:
         print("ERROR: There is no connection to the POS")
