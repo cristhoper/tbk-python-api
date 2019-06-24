@@ -177,6 +177,7 @@ class TbkPos(object):
         cmd = STX + "0200|" + str(amount) + "|" + str(voucher[-6:]) + "|0|1" + ETX
         cmd_hex = posutils.hex_string(cmd, crc=True)
         flag = False
+        res_type = None
         try:
             results = obj.set_response(self.__execute(cmd_hex))
             print("Sends the sale")
@@ -186,20 +187,22 @@ class TbkPos(object):
             result = None
             for res in results:
                 print("process data: {}".format(res))
+                res_type = self.__get_flags(result, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
-                while flag not in STOP_TOKENS:
+                while res_type != "210":
                     res = obj.set_response(self.__wait_data(10))
                     for data in res:
+                        res_type = self.__get_flags(result, TX_MENSAJE)
                         flag = self.__get_flags(data, TX_RESPUESTA)
                         print("current flag: {}".format(flag))
-                        if flag in STOP_TOKENS:
+                        if res_type == "210":
                             result = res
                             break
-                if flag in STOP_TOKENS:
+                if res_type == "210":
                     result = res
                     break
             print("current result: {}".format(result))
-            if result is not None and flag == "00":
+            if result is not None and flag == "00" and res_type == "210":
                 print("result: {}".format(result))
                 if isinstance(result, list):
                     result = result[0]
