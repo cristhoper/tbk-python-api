@@ -8,7 +8,7 @@ from flask_cors import CORS
 from os import name
 DEVICE_LIST = ["/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3"]
 if name == 'nt':
-    DEVICE = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10", "COM11", "COM12"]
+    DEVICE_LIST = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10", "COM11", "COM12"]
 IP = "0.0.0.0"
 PORT = 4001
 

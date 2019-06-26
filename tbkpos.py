@@ -140,6 +140,7 @@ class TbkPos(object):
                 obj.add_content("terminal_id", self.__get_flags(results[0], TX_TERMINAL_ID))
         except Exception as err:
             print("More errors: {}".format(err))
+        self.ack()
         return obj
                                               
     def polling(self):
@@ -156,6 +157,7 @@ class TbkPos(object):
                 obj.set_text("Puerto incorrecto, intente con otro puerto.")
         except IOError as err:
             print("More errors: {}".format(err))
+        self.ack()
         return obj
 
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
