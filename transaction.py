@@ -8,6 +8,12 @@ class TransactionData(object):
         self.text = None
         self.content = {}
 
+    def json(self):
+        ret = {}
+        for value in self.__dict__:
+            ret[value] = self.__getattribute__(value)
+        return ret
+
     def set_response(self, response):
         self.result = True
         self.response = response
