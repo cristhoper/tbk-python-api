@@ -173,7 +173,8 @@ def check(transaction_id):
 
 @app.route("/print/<filename>", methods=['GET'])
 def print_file(filename):
-    os.system("python utils/print.py {}.pdf".format(filename))
+    from pos_print import print_pdf_file
+    print_pdf_file(filename)
     return "PRINT SENDED"
 
 
