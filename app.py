@@ -1,5 +1,6 @@
 from json import dumps
 from threading import Thread, RLock
+import os
 
 from flask import Flask, request, abort, Response
 from tbkpos import TbkPos
@@ -168,6 +169,12 @@ def check(transaction_id):
                     status=200,
                     mimetype="application/json")
     return resp
+
+
+@app.route("/print/<filename>", methods=['GET'])
+def print_file(filename):
+    os.system("python utils/print.py {}.pdf".format(filename))
+    return "PRINT SENDED"
 
 
 if __name__ == "__main__":
