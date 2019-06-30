@@ -3,6 +3,8 @@ from threading import Thread, RLock
 import os
 
 from flask import Flask, request, abort, Response
+
+from pos_print import print_html_data, print_pdf_file
 from tbkpos import TbkPos
 from flask_cors import CORS
 
@@ -95,6 +97,7 @@ def worker_sale(amount, transaction_id, dummy=False):
     pos_status = pos.sale_init(amount, transaction_id, dummy)
     transactions_in_progress[transaction_id] = pos_status
     print("Worker ended")
+    print_html_data(pos_status)
     safe_pos.release()
 
 
@@ -173,7 +176,6 @@ def check(transaction_id):
 
 @app.route("/print/<filename>", methods=['GET'])
 def print_file(filename):
-    from pos_print import print_pdf_file
     print_pdf_file(filename)
     return "PRINT SENDED"
 
