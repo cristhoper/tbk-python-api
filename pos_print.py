@@ -4,7 +4,7 @@ from xhtml2pdf import pisa
 import win32print
 import win32api
 
-PDF_PATHS = "C:\\Program Files (x86)\\amps\\www\\htdocs\\assets\\files\\"
+PDF_PATHS = "C:\\Program Files (x86)\\Ampps\\www\\assets\\files\\"
 
 
 def print_pdf_file(pdf_file):
