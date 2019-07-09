@@ -191,7 +191,8 @@ class TbkPos(object):
                 print("process data: {}".format(res))
                 res_type = self.__get_flags(result, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
-                while res_type != "210":
+                # while res_type != "210":
+                while flag not in STOP_TOKENS:
                     res = obj.set_response(self.__wait_data(10))
                     for data in res:
                         res_type = self.__get_flags(result, TX_MENSAJE)
