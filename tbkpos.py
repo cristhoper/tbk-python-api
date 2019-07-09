@@ -7,7 +7,7 @@ from time import sleep, time
 
 
 class TbkPos(object):
-    lock = RLock()    
+    lock = RLock()
 
     def __init__(self, device, baudrate=115200):
         self.ser = None
@@ -90,7 +90,7 @@ class TbkPos(object):
         if not flag and flag_number == VENTA_OP_MONTO_CUOTA:
             flag = "0"
         if flag_number == TX_TERMINAL_ID:
-            separator = ""+ETX
+            separator = "" + ETX
             parts = flag.split(separator)
             flag = parts[0]
         return flag
@@ -152,7 +152,7 @@ class TbkPos(object):
             print("More errors: {}".format(err))
         self.ack()
         return obj
-                                              
+
     def polling(self):
         print("POS POLLING...")
         obj = TransactionData()
@@ -238,7 +238,7 @@ class TbkPos(object):
         except Exception as err:
             print("More errors: {}".format(err))
         return obj
-    
+
     def sale_detail(self):  # TODO check return data
         obj = TransactionData()
         cmd = STX + "0260|0" + ETX + "K"
@@ -319,5 +319,3 @@ class TbkPos(object):
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
-
-
