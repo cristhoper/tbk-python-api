@@ -114,7 +114,25 @@ class TbkPos(object):
                     obj.result = True
                     obj.set_text("Inicializado")
                     break
+            self.polling()
+            self.resp_init()
+        except IOError as err:
+            print("More errors: {}".format(err))
+        return obj
 
+    def resp_init(self):
+        print("response initialization...")
+        obj = TransactionData()
+        cmd = STX + "0080" + ETX
+        cmd_hex = posutils.hex_string(cmd, crc=True)
+        try:
+            results = obj.set_response(self.__execute(cmd_hex))
+            for result in results:
+                obj.set_text("Problema al conectar")
+                if result == ACK:
+                    obj.result = True
+                    obj.set_text("Inicializado")
+                    break
         except IOError as err:
             print("More errors: {}".format(err))
         return obj
@@ -169,7 +187,7 @@ class TbkPos(object):
                 obj.set_text("Puerto incorrecto, intente con otro puerto.")
         except IOError as err:
             print("More errors: {}".format(err))
-        self.ack()
+        self.ack(nowait=True)
         return obj
 
     def sale_init(self, amount, voucher='0', dummy=False):  # , **kwargs):
@@ -185,7 +203,7 @@ class TbkPos(object):
             print("Sends the sale")
             if results[0] == ACK:
                 print("wait for more data")
-                results = obj.set_response(self.__wait_data())
+                results = obj.set_response(self.__wait_data(20))
             result = None
             for res in results:
                 print("process data: {}".format(res))
@@ -193,7 +211,6 @@ class TbkPos(object):
                 flag = self.__get_flags(res, TX_RESPUESTA)
                 # while res_type != "210":
                 while flag not in STOP_TOKENS or res_type != "210":
-                    self.ack(nowait=True)
                     res = obj.set_response(self.__wait_data(30))
                     for data in res:
                         res_type = self.__get_flags(result, TX_MENSAJE)
@@ -205,6 +222,7 @@ class TbkPos(object):
                 if res_type == "210":
                     result = res
                     break
+            self.ack(nowait=True)
             print("current result: {}".format(result))
             if result is not None and flag == "00" and res_type == "210":
                 print("result: {}".format(result))
