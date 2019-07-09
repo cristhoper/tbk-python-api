@@ -203,33 +203,30 @@ class TbkPos(object):
             print("Sends the sale")
             if results[0] == ACK:
                 print("wait for more data")
-                results = obj.set_response(self.__wait_data(20))
+                results = obj.set_response(self.__wait_data(30))
             result = None
             for res in results:
-                print("process data: {}".format(res))
                 res_type = self.__get_flags(result, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
-                # while res_type != "210":
-                while flag not in STOP_TOKENS:
-                    res = obj.set_response(self.__wait_data(30))
-                    for data in res:
-                        res_type = self.__get_flags(result, TX_MENSAJE)
-                        flag = self.__get_flags(data, TX_RESPUESTA)
-                        print("current flag: {}".format(flag))
-                        if flag not in STOP_TOKENS:
-                            result = res
-                            break
-                if res_type == "210":
-                    result = res
-                    break
+                print("status data: {}".format(res))
+
+            while res_type != "0210":
+                res = obj.set_response(self.__wait_data(30))
+                for data in res:
+                    res_type = self.__get_flags(result, TX_MENSAJE)
+                    flag = self.__get_flags(data, TX_RESPUESTA)
+                    print("current flag: {}".format(flag))
+                    if flag not in STOP_TOKENS:
+                        result = res
+                        break
+
             self.ack(nowait=True)
             print("current result: {}".format(result))
-            if result is not None and flag == "00" and res_type == "210":
+            if result is not None and flag == "00" and res_type == "0210":
                 print("result: {}".format(result))
                 if isinstance(result, list):
                     result = result[0]
                 result = result.split('|')
-
                 obj.add_content("num_voucher", voucher)
                 obj.add_content("codigo_comercio", result[TX_CODIGO_COMERCIO])
                 obj.add_content("terminal_id", result[TX_TERMINAL_ID])
