@@ -234,6 +234,7 @@ class TbkPos(object):
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
                 obj.add_content("status", "FAIL")
+                obj.add_content("debug", result)
             self.ack(nowait=True)
         except Exception as err:
             print("More errors: {}".format(err))
