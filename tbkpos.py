@@ -193,6 +193,7 @@ class TbkPos(object):
                 flag = self.__get_flags(res, TX_RESPUESTA)
                 # while res_type != "210":
                 while flag not in STOP_TOKENS or res_type != "210":
+                    self.ack(nowait=True)
                     res = obj.set_response(self.__wait_data(30))
                     for data in res:
                         res_type = self.__get_flags(result, TX_MENSAJE)
@@ -230,6 +231,11 @@ class TbkPos(object):
                 obj.set_text(self.__get_properties(flag))
                 obj.set_response_code(flag)
                 obj.result = True
+            elif flag == "00" and res_type != "210":
+                obj.set_response_code(flag)
+                obj.set_text(self.__get_properties(flag))
+                obj.add_content("status", "WAIT")
+                obj.add_content("debug", results)
             else:
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
