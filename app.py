@@ -96,8 +96,8 @@ def worker_sale(amount, transaction_id, dummy=False):
     transactions_in_progress[transaction_id] = None
     pos_status = pos.sale_init(amount, transaction_id, dummy)
     transactions_in_progress[transaction_id] = pos_status
-    print("Worker ended")
     print_html_data(pos_status)
+    print("Worker ended")
     safe_pos.release()
 
 
