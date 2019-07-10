@@ -189,21 +189,21 @@ class TbkPos(object):
                 print("process data: {}".format(res))
                 res_type = self.__get_flags(result, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
-                while res_type != "210":
+                while res_type != "0210":
                     res = obj.set_response(self.__wait_data(10))
                     for data in res:
                         res_type = self.__get_flags(result, TX_MENSAJE)
                         flag = self.__get_flags(data, TX_RESPUESTA)
                         print("current flag: {}".format(flag))
-                        if res_type == "210":
+                        if res_type == "0210":
                             result = res
                             break
-                if res_type == "210":
+                if res_type == "0210":
                     result = res
                     break
             self.ack(nowait=True)
             print("current result: {}".format(result))
-            if result is not None and flag == "00" and res_type == "210":
+            if result is not None and flag == "00" and res_type == "0210":
                 print("result: {}".format(result))
                 if isinstance(result, list):
                     result = result[0]
@@ -233,6 +233,8 @@ class TbkPos(object):
                 obj.add_content("status", "FAIL")
         except Exception as err:
             print("More errors: {}".format(err))
+
+            self.ack(nowait=True)
         return obj
     
     def sale_detail(self):  # TODO check return data
