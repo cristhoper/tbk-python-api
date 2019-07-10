@@ -195,6 +195,7 @@ class TbkPos(object):
                         res_type = self.__get_flags(result, TX_MENSAJE)
                         flag = self.__get_flags(data, TX_RESPUESTA)
                         print("current flag: {}".format(flag))
+                        print("current flag: {}".format(res_type))
                         if res_type == "0210":
                             result = res
                             break
