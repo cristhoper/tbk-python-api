@@ -96,10 +96,9 @@ class TbkPos(object):
         return flag
 
     def all(self):
-        self.close()
-        self.polling()
         self.initialization()
         self.load_keys()
+        self.polling()
 
     def initialization(self):
         print("POS initialization...")
