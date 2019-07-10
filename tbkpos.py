@@ -201,6 +201,7 @@ class TbkPos(object):
                 if res_type == "210":
                     result = res
                     break
+            self.ack(nowait=True)
             print("current result: {}".format(result))
             if result is not None and flag == "00" and res_type == "210":
                 print("result: {}".format(result))
@@ -230,7 +231,6 @@ class TbkPos(object):
                 obj.set_response_code(flag)
                 obj.set_text(self.__get_properties(flag))
                 obj.add_content("status", "FAIL")
-            self.ack(nowait=True)
         except Exception as err:
             print("More errors: {}".format(err))
         return obj
