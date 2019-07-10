@@ -209,8 +209,11 @@ class TbkPos(object):
                 res_type = self.__get_flags(result, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
                 print("status data: {}".format(res))
+                if flag in STOP_TOKENS:
+                    result = res
+                    break
 
-            while res_type != "0210":
+            while flag not in STOP_TOKENS:
                 res = obj.set_response(self.__wait_data(30))
                 for data in res:
                     res_type = self.__get_flags(result, TX_MENSAJE)
@@ -219,7 +222,6 @@ class TbkPos(object):
                     if flag not in STOP_TOKENS:
                         result = res
                         break
-
             self.ack(nowait=True)
             print("current result: {}".format(result))
             if result is not None and flag == "00" and res_type == "0210":
