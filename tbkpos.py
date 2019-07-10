@@ -187,15 +187,14 @@ class TbkPos(object):
             result = None
             for res in results:
                 print("process data: {}".format(res))
-                res_type = self.__get_flags(result, TX_MENSAJE)
+                res_type = self.__get_flags(res, TX_MENSAJE)
                 flag = self.__get_flags(res, TX_RESPUESTA)
                 while res_type != "0210":
                     res = obj.set_response(self.__wait_data(10))
                     for data in res:
-                        res_type = self.__get_flags(result, TX_MENSAJE)
+                        res_type = self.__get_flags(data, TX_MENSAJE)
                         flag = self.__get_flags(data, TX_RESPUESTA)
-                        print("current flag: {}".format(flag))
-                        print("current flag: {}".format(res_type))
+                        print("current flags: {}/{}".format(res_type, flag))
                         if res_type == "0210":
                             result = res
                             break
