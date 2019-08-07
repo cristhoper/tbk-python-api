@@ -1,7 +1,7 @@
 setuptools
 json_rpc==1.10.3
 requests>=2.20.0
-flask==0.12.3
+flask==1.0
 flask_cors
 pyserial==3.3
 xhtml2pdf
